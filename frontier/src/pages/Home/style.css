@@ -64,3 +64,38 @@
 .buttonStyle:hover {
   background-color: #1251a3;
 }
+/* style.css */
+.create-activity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f9f9f9;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  max-width: 400px;
+  margin: 24px auto;
+}
+
+.create-activity-form input[type="text"],
+.create-activity-form input[type="file"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.create-activity-form .buttonStyle {
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.create-activity-form .buttonStyle:hover {
+  background-color: #1251a3;
+}
