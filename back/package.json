@@ -4,11 +4,14 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "@koa/cors": "^5.0.0",
     "@midwayjs/bootstrap": "^3.12.0",
     "@midwayjs/core": "^3.20.4",
+    "@midwayjs/decorator": "^3.20.4",
     "@midwayjs/info": "^3.12.0",
     "@midwayjs/koa": "^3.12.0",
     "@midwayjs/logger": "^3.1.0",
+    "@midwayjs/typeorm": "^3.20.4",
     "@midwayjs/validate": "^3.12.0",
     "typeorm": "^0.3.25"
   },
