@@ -27,6 +27,30 @@
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.login-btn:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+}
+
+.user-btn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.user-btn:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
 }
 .activity-box {
   display: flex;
