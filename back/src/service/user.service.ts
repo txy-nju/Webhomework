@@ -2,11 +2,15 @@ import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
+import { Comment } from '../entity/comment.entity';
 
 @Provide()
 export class UserService {
   @InjectEntityModel(User)
   userModel: Repository<User>;
+
+  @InjectEntityModel(Comment)
+  commentModel: Repository<Comment>;
 
   async getUser(LoginData: { username: string; password: string }) {
     const user = await this.userModel.findOne({
@@ -25,5 +29,14 @@ export class UserService {
     } else {
       return { success: false, message: '用户不存在' };
     }
+  }
+
+  // 获取用户的所有评论
+  async getUserComments(userId: number) {
+    return await this.commentModel.find({
+      where: { author: { id: userId } },
+      relations: ['author'],
+      order: { createdAt: 'DESC' },
+    });
   }
 }

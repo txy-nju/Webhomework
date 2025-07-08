@@ -2,7 +2,8 @@
 import React, { useState } from 'react'
 import './style.css' // 建议单独写样式
 import LoginPage from '../Login/index.jsx'
-//import Activity from '../../entity/Activity'
+import ActivityDetail from '../ActivityDetail/index.jsx'
+import { ShowActivity, CreateActivity } from '../Activity/index.jsx' // 从Activity导入组件
 
 function Header({ onLoginClick, user, isLoggedIn }) {
   const handleLogin = () => {
@@ -27,81 +28,12 @@ function Header({ onLoginClick, user, isLoggedIn }) {
   )
 }
 
-// 接下来实现活动的展示页面ShowActivity
-export function ShowActivity({ activity }) {
-  return (
-    <div className="activity-box">
-      <img
-        className="activity-img"
-        src={activity.photo}
-        alt="活动图片"
-      />
-      <div className="activity-desc">
-        <h2>{activity.name}</h2>
-        <p>{activity.description}</p>
-        <button className='buttonStyle'>了解详情</button>
-      </div>
-    </div>
-  )
-}
-
-//添加功能：发起活动
-export function CreateActivity({ onActivityCreated }) {
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = {
-      name: formData.get('name'),
-      description: formData.get('description'),
-      time: formData.get('time'),
-      photo: 'https://via.placeholder.com/150' // 默认图片
-    };
-    
-    try {
-      // 这里可以添加对 data 的处理逻辑，比如发送请求
-      const res = await fetch('http://localhost:7001/api/activity/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
-      
-      if (result.success) {
-        alert('活动创建成功');
-        // 创建成功后，调用回调函数更新活动列表
-        if (onActivityCreated) {
-          onActivityCreated(data);
-        }
-        // 清空表单
-        e.target.reset();
-      } else {
-        alert('活动创建失败');
-      }
-    } catch (error) {
-      console.error('创建活动时出错:', error);
-      alert('创建活动时出错，请重试');
-    }
-  };
-  
-  return (
-    <div>
-      <form className="create-activity-form" onSubmit={handleSubmit}>
-        <input type="text" name="name" placeholder="活动名称" required />
-        <input type="text" name="description" placeholder="活动描述" required />
-        <input type="text" name="time" placeholder="活动时间" required />
-        <button type="submit" className="buttonStyle">发起活动</button>
-      </form>
-    </div>
-  )
-}
-
 // 主页面组件，管理活动列表状态
 export default function HomePage() {
   // 管理当前页面状态
-  const [currentPage, setCurrentPage] = useState('home'); // 'home' 或 'login'
-    // 提示：添加用户状态
+  const [currentPage, setCurrentPage] = useState('home'); // 'home', 'login', 'activityDetail'
+  const [selectedActivity, setSelectedActivity] = useState(null); // 当前选中的活动
+  // 提示：添加用户状态
   const [user, setUser] = useState(null); // null表示未登录
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // 初始化一些示例活动
@@ -149,6 +81,13 @@ export default function HomePage() {
     setCurrentPage('home');
   }
 
+  // 处理查看活动详情
+  const handleActivityDetail = (activity) => {
+    console.log('查看活动详情:', activity);
+    setSelectedActivity(activity);
+    setCurrentPage('activityDetail');
+  }
+
   // 根据当前页面状态渲染不同内容
   if (currentPage === 'login') {
     return (
@@ -157,6 +96,20 @@ export default function HomePage() {
         <div className="main-content">
           <LoginPage onBackToHome={handleBackToHome} onLoginSuccess={handleLoginSuccess} />
         </div>
+      </div>
+    );
+  }
+
+  if (currentPage === 'activityDetail') {
+    return (
+      <div>
+        <Header onLoginClick={handleLoginClick} user={user} isLoggedIn={isLoggedIn} />
+        <ActivityDetail 
+          activity={selectedActivity}
+          onBackToHome={handleBackToHome}
+          user={user}
+          isLoggedIn={isLoggedIn}
+        />
       </div>
     );
   }
@@ -173,7 +126,11 @@ export default function HomePage() {
           <h2>活动列表</h2>
           <div className="activities-list">
             {activities.map(activity => (
-              <ShowActivity key={activity.id} activity={activity} />
+              <ShowActivity 
+                key={activity.id} 
+                activity={activity} 
+                onDetailClick={handleActivityDetail}
+              />
             ))}
           </div>
         </div>

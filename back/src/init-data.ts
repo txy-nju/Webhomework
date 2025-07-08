@@ -2,14 +2,27 @@
 import { DataSource } from 'typeorm';
 import { User } from './entity/user.entity';
 import { Activity } from './entity/activity.entity';
+import { Comment } from './entity/comment.entity';
+
+// 添加延迟函数
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function initTestData() {
+  // 等待一下确保没有其他进程占用数据库
+  console.log('等待数据库就绪...');
+  await delay(2000);
+
   // 创建数据源连接
   const dataSource = new DataSource({
     type: 'sqlite',
     database: 'db.sqlite',
-    entities: [User, Activity],
+    entities: [User, Activity, Comment], // 添加Comment实体
     synchronize: true,
+    extra: {
+      busyTimeout: 30000, // 30秒超时
+    },
   });
 
   try {
