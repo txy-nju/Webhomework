@@ -22,7 +22,7 @@ export class User {
   email: string;
 
   @OneToMany(() => Activity, activity => activity.user)
-  activities: Activity[]; // 用户持有的活动列表
+  createdActivities: Activity[]; // 用户发起的活动列表
 
   @ManyToMany(() => Activity, activity => activity.participants)
   participatedActivities: Activity[]; // 用户参与的活动列表

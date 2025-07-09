@@ -17,8 +17,24 @@ export class ActivityService {
   commentModel: Repository<Comment>;
 
   // 根据前端传入的数据创建活动
-  async createActivity(data: Partial<Activity>) {
-    const activity = this.activityModel.create(data);
+  async createActivity(data: Partial<Activity> & { userId: number }) {
+    const { userId, ...activityData } = data;
+
+    // 查找创建者用户
+    const user = await this.userModel.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('创建者用户不存在');
+    }
+
+    // 创建活动并设置创建者
+    const activity = this.activityModel.create({
+      ...activityData,
+      user: user, // 设置创建者
+    });
+
     return await this.activityModel.save(activity);
   }
 
@@ -132,9 +148,25 @@ export class ActivityService {
 
   // 获取所有活动列表
   async getAllActivities() {
-    return await this.activityModel.find({
-      relations: ['user', 'participants'],
-    });
+    try {
+      const activities = await this.activityModel.find({
+        relations: ['user', 'participants'],
+        order: { createdAt: 'DESC' },
+      });
+
+      // 为每个活动添加参与人数
+      const activitiesWithCount = activities.map(activity => ({
+        ...activity,
+        participantCount: activity.participants
+          ? activity.participants.length
+          : 0,
+      }));
+
+      return activitiesWithCount;
+    } catch (error) {
+      console.error('获取所有活动失败:', error);
+      throw new Error('获取活动列表失败');
+    }
   }
 
   // 根据ID获取活动详情

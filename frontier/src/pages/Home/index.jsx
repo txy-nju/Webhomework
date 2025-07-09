@@ -1,11 +1,12 @@
 //实现界面顶部的登录功能
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './style.css' // 建议单独写样式
 import LoginPage from '../Login/index.jsx'
 import ActivityDetail from '../ActivityDetail/index.jsx'
 import { ShowActivity, CreateActivity } from '../Activity/index.jsx' // 从Activity导入组件
+import ProfilePage from '../Profile/index.jsx'
 
-function Header({ onLoginClick, user, isLoggedIn }) {
+function Header({ onLoginClick, onProfileClick, user, isLoggedIn }) {
   const handleLogin = () => {
     // 处理登录按钮点击事件
     if (onLoginClick) {
@@ -13,11 +14,18 @@ function Header({ onLoginClick, user, isLoggedIn }) {
     }
   };
 
+  const handleProfile = () => {
+    // 处理个人资料按钮点击事件
+    if (onProfileClick) {
+      onProfileClick();
+    }
+  };
+
   return (
     <header className="fixed-header">
       <div className="header-content">
         <span>体育活动室</span>
-        <button className='logo-btn'>我的活动</button>
+        <button className='logo-btn' onClick={handleProfile}>我的活动</button>
         {!isLoggedIn ? (
           <button className="login-btn" onClick={handleLogin}>登录</button>
         ) : (
@@ -36,31 +44,62 @@ export default function HomePage() {
   // 提示：添加用户状态
   const [user, setUser] = useState(null); // null表示未登录
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // 初始化一些示例活动
-  const [activities, setActivities] = useState([
-    {
-      id: 1,
-      photo: 'https://via.placeholder.com/150',
-      name: '篮球比赛',
-      description: '周末篮球友谊赛，欢迎大家参加！',
-      time: '2025-07-12 14:00'
-    },
-    {
-      id: 2,
-      photo: 'https://via.placeholder.com/150',
-      name: '羽毛球训练',
-      description: '羽毛球基础训练课程',
-      time: '2025-07-15 18:00'
+  // 活动列表状态
+  const [activities, setActivities] = useState([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+
+  // 获取所有活动
+  const fetchActivities = async () => {
+    setActivitiesLoading(true);
+    try {
+      // 这里应该调用获取所有活动的API
+      // 目前我们用一个模拟的方式，之后需要实现后端的获取所有活动接口
+      const response = await fetch('http://localhost:7001/api/activity/all');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setActivities(result.data);
+        }
+      }
+    } catch (error) {
+      console.error('获取活动列表失败:', error);
+      // 如果API失败，使用一些基本的示例数据
+      setActivities([
+        {
+          id: 1,
+          photo: 'https://via.placeholder.com/150',
+          name: '篮球比赛',
+          description: '周末篮球友谊赛，欢迎大家参加！',
+          time: '2025-07-12 14:00',
+          location: '体育馆',
+          maxParticipants: 20,
+          status: 'active'
+        },
+        {
+          id: 2,
+          photo: 'https://via.placeholder.com/150',
+          name: '羽毛球训练',
+          description: '羽毛球基础训练课程',
+          time: '2025-07-15 18:00',
+          location: '羽毛球场',
+          maxParticipants: 16,
+          status: 'active'
+        }
+      ]);
+    } finally {
+      setActivitiesLoading(false);
     }
-  ]);
+  };
+
+  // 页面加载时获取活动列表
+  useEffect(() => {
+    fetchActivities();
+  }, []);
 
   // 添加新活动的回调函数
-  const handleActivityCreated = (newActivity) => {
-    const activityWithId = {
-      ...newActivity,
-      id: Date.now() // 简单的ID生成，实际项目中应该使用更好的方式
-    };
-    setActivities(prevActivities => [activityWithId, ...prevActivities]);
+  const handleActivityCreated = () => {
+    // 重新获取活动列表以确保数据同步
+    fetchActivities();
   };
 
   // 处理登录按钮点击
@@ -88,11 +127,20 @@ export default function HomePage() {
     setCurrentPage('activityDetail');
   }
 
+  const handleProfileClick =() => {
+    if(isLoggedIn && user) {
+      setCurrentPage('profile');
+    }else {
+      alert('请先登录！');
+      setCurrentPage('login');
+    }
+  }
+
   // 根据当前页面状态渲染不同内容
   if (currentPage === 'login') {
     return (
       <div>
-        <Header user={user} isLoggedIn={isLoggedIn} />
+        <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} user={user} isLoggedIn={isLoggedIn} />
         <div className="main-content">
           <LoginPage onBackToHome={handleBackToHome} onLoginSuccess={handleLoginSuccess} />
         </div>
@@ -103,7 +151,7 @@ export default function HomePage() {
   if (currentPage === 'activityDetail') {
     return (
       <div>
-        <Header onLoginClick={handleLoginClick} user={user} isLoggedIn={isLoggedIn} />
+        <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} user={user} isLoggedIn={isLoggedIn} />
         <ActivityDetail 
           activity={selectedActivity}
           onBackToHome={handleBackToHome}
@@ -114,9 +162,20 @@ export default function HomePage() {
     );
   }
 
+  if (currentPage === 'profile') {
+    return (
+      <div>
+        <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} user={user} isLoggedIn={isLoggedIn} />
+        <div className="main-content">
+          <ProfilePage user={user} isLoggedIn={isLoggedIn} onBackHome={handleBackToHome} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <Header onLoginClick={handleLoginClick} user={user} isLoggedIn={isLoggedIn} />
+      <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} user={user} isLoggedIn={isLoggedIn} />
       <div className="main-content">
         <div className="create-section">
           <h2>发起新活动</h2>
@@ -125,13 +184,23 @@ export default function HomePage() {
         <div className="activities-section">
           <h2>活动列表</h2>
           <div className="activities-list">
-            {activities.map(activity => (
-              <ShowActivity 
-                key={activity.id} 
-                activity={activity} 
-                onDetailClick={handleActivityDetail}
-              />
-            ))}
+            {activitiesLoading ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <p>正在加载活动...</p>
+              </div>
+            ) : activities.length > 0 ? (
+              activities.map(activity => (
+                <ShowActivity 
+                  key={activity.id} 
+                  activity={activity} 
+                  onDetailClick={handleActivityDetail}
+                />
+              ))
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <p>暂无活动，快来创建第一个活动吧！</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

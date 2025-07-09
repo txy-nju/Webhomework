@@ -6,10 +6,29 @@ export class ActivityController {
   @Inject()
   activityService: ActivityService;
 
+  // 获取所有活动列表
+  @Get('/all')
+  async getAllActivities() {
+    try {
+      const activities = await this.activityService.getAllActivities();
+      return { success: true, data: activities };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+
   @Post('/create')
   async create(@Body() body) {
-    const result = await this.activityService.createActivity(body);
-    return { success: true, data: result };
+    try {
+      if (!body.userId) {
+        return { success: false, message: '创建活动需要指定用户ID' };
+      }
+      
+      const result = await this.activityService.createActivity(body);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
   }
 
   // 参与活动
@@ -92,17 +111,6 @@ export class ActivityController {
         body.userId
       );
       return { success: true, message: '评论删除成功', data: result };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  }
-
-  // 获取所有活动列表
-  @Get('/list')
-  async getAllActivities() {
-    try {
-      const activities = await this.activityService.getAllActivities();
-      return { success: true, data: activities };
     } catch (error) {
       return { success: false, message: error.message };
     }
