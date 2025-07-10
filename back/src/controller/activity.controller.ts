@@ -23,7 +23,7 @@ export class ActivityController {
       if (!body.userId) {
         return { success: false, message: '创建活动需要指定用户ID' };
       }
-      
+
       const result = await this.activityService.createActivity(body);
       return { success: true, data: result };
     } catch (error) {

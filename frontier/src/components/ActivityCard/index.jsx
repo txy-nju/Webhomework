@@ -1,6 +1,8 @@
 import './style.css'
 
-const ActivityCard = ({ activity, type }) => {
+const ActivityCard = ({ activity, type, onViewDetail, onLeaveActivity }) => {
+    // 添加调试信息
+    console.log('ActivityCard render:', { activity, type, onViewDetail: !!onViewDetail, onLeaveActivity: !!onLeaveActivity });
     const formatDate = (dateString) => {
         if (!dateString) return '未设置';
         
@@ -67,12 +69,16 @@ const ActivityCard = ({ activity, type }) => {
             </div>
             
             <div className="activity-actions">
-                <button className="btn-detail">查看详情</button>
+                <button className="btn-detail" onClick={() => onViewDetail && onViewDetail(activity)}>
+                    查看详情
+                </button>
                 {type === 'created' && (
                     <button className="btn-edit">编辑活动</button>
                 )}
                 {type === 'participated' && (
-                    <button className="btn-quit">退出活动</button>
+                    <button className="btn-quit" onClick={() => onLeaveActivity && onLeaveActivity(activity)}>
+                        退出活动
+                    </button>
                 )}
             </div>
         </div>
