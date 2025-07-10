@@ -23,6 +23,13 @@ function LoginPage({ onBackToHome, onLoginSuccess }) {
       const result = await res.json();
       
       if (result.success) {
+        // 将用户信息存储到localStorage以实现持久化登录
+        const userDataWithToken = {
+          ...result.data,
+          loginTime: new Date().getTime() // 记录登录时间
+        };
+        localStorage.setItem('userInfo', JSON.stringify(userDataWithToken));
+        
         alert('登录成功');
         // 登录成功后返回首页
         onLoginSuccess(result.data); // 调用回调函数传递用户数据

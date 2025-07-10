@@ -11,6 +11,7 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
     const [error, setError] = useState('')
     const [selectedActivity, setSelectedActivity] = useState(null)
     const [showActivityDetail, setShowActivityDetail] = useState(false)
+    const [editMode, setEditMode] = useState(false)
 
     useEffect(() => {
         const fetchParticipatedActivities = async () => {
@@ -69,6 +70,7 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
     // 处理查看详情
     const handleViewDetail = (activity) => {
         setSelectedActivity(activity);
+        setEditMode(false);
         setShowActivityDetail(true);
     };
 
@@ -108,6 +110,15 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
     const handleCloseDetail = () => {
         setShowActivityDetail(false);
         setSelectedActivity(null);
+        setEditMode(false);
+    };
+
+    // 处理编辑活动
+    const handleEditActivity = (activity) => {
+        // 设置选中的活动并切换到ActivityDetail页面，进入编辑模式
+        setSelectedActivity(activity);
+        setEditMode(true);
+        setShowActivityDetail(true);
     };
 
     return (
@@ -118,6 +129,23 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
                     onBackToHome={handleCloseDetail}
                     user={user}
                     isLoggedIn={isLoggedIn}
+                    startInEditMode={editMode}
+                    onActivityUpdated={() => {
+                        // 当活动更新后，刷新创建的活动列表
+                        const fetchCreatedActivities = async () => {
+                            try {
+                                const response = await fetch(`http://localhost:7001/api/user/created-activities?userId=${user.id}`);
+                                const result = await response.json();
+                                if (result.success) {
+                                    setCreatedActivities(result.data);
+                                }
+                            } catch (error) {
+                                console.error('刷新创建活动失败:', error);
+                            }
+                        };
+                        fetchCreatedActivities();
+                        handleCloseDetail();
+                    }}
                 />
             ) : (
                 <>
@@ -173,6 +201,7 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
                                                         activity={activity} 
                                                         type="created"
                                                         onViewDetail={handleViewDetail}
+                                                        onEditActivity={handleEditActivity}
                                                     />
                                                 );
                                             })

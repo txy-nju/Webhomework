@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './style.css';
 
-function ActivityDetail({ activity, onBackToHome, user, isLoggedIn }) {
+function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditMode = false, onActivityUpdated }) {
   const [participants, setParticipants] = useState([]);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -60,6 +60,19 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn }) {
   useEffect(() => {
     checkParticipation();
   }, [checkParticipation]);
+
+  // 处理自动进入编辑模式
+  useEffect(() => {
+    if (startInEditMode && activity) {
+      setEditedActivity({
+        name: activity.name,
+        time: activity.time,
+        description: activity.description,
+        photo: activity.photo
+      });
+      setIsEditing(true);
+    }
+  }, [startInEditMode, activity]);
 
   // 参与活动
   const handleJoinActivity = async () => {
@@ -209,8 +222,13 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn }) {
       if (result.success) {
         alert('活动更新成功！');
         setIsEditing(false);
-        // 这里应该更新父组件的活动数据，暂时用alert提示用户刷新
-        alert('请刷新页面查看更新后的活动信息');
+        // 调用回调函数通知父组件更新
+        if (onActivityUpdated) {
+          onActivityUpdated();
+        } else {
+          // 如果没有回调函数，显示提示
+          alert('请刷新页面查看更新后的活动信息');
+        }
       } else {
         alert(result.message || '更新活动失败');
       }
