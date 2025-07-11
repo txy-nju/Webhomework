@@ -27,15 +27,23 @@ export function ShowActivity({ activity, onDetailClick }) {
 }
 
 // 创建活动组件
-export function CreateActivity({ onActivityCreated }) {
+export function CreateActivity({ onActivityCreated, user, isLoggedIn }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // 检查登录状态
+    if (!isLoggedIn || !user) {
+      alert('请先登录后再创建活动');
+      return;
+    }
+    
     const formData = new FormData(e.target);
     const data = {
       name: formData.get('name'),
       description: formData.get('description'),
       time: formData.get('time'),
-      photo: 'https://via.placeholder.com/150' // 默认图片
+      photo: 'https://via.placeholder.com/150', // 默认图片
+      userId: user.id // 添加用户ID
     };
     
     try {
@@ -58,7 +66,7 @@ export function CreateActivity({ onActivityCreated }) {
         // 清空表单
         e.target.reset();
       } else {
-        alert('活动创建失败');
+        alert('活动创建失败：' + (result.message || '未知错误'));
       }
     } catch (error) {
       console.error('创建活动时出错:', error);

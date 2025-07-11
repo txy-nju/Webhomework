@@ -169,9 +169,22 @@
     box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
 }
 
+.btn-complete {
+    background: linear-gradient(135deg, #27ae60, #229954);
+    color: white;
+    box-shadow: 0 3px 6px rgba(39, 174, 96, 0.3);
+}
+
+.btn-complete:hover {
+    background: linear-gradient(135deg, #229954, #1e8449);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.4);
+}
+
 .btn-detail:active,
 .btn-edit:active,
-.btn-quit:active {
+.btn-quit:active,
+.btn-complete:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -274,4 +287,8 @@
 
 .btn-quit:focus {
     box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+}
+
+.btn-complete:focus {
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
 }

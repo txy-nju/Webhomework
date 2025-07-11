@@ -57,6 +57,9 @@ export default function HomePage() {
   // 活动列表状态
   const [activities, setActivities] = useState([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
+  // 搜索相关状态
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredActivities, setFilteredActivities] = useState([]);
 
   // 检查localStorage中的登录状态
   useEffect(() => {
@@ -139,6 +142,20 @@ export default function HomePage() {
     fetchActivities();
   }, []);
 
+  // 搜索功能：当搜索关键词或活动列表变化时，更新过滤结果
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredActivities(activities);
+    } else {
+      const filtered = activities.filter(activity =>
+        activity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        activity.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        activity.location?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredActivities(filtered);
+    }
+  }, [searchQuery, activities]);
+
   // 添加新活动的回调函数
   const handleActivityCreated = () => {
     // 重新获取活动列表以确保数据同步
@@ -188,6 +205,12 @@ export default function HomePage() {
     }
   }
 
+  // 处理搜索输入
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+
   // 根据当前页面状态渲染不同内容
   if (currentPage === 'login') {
     return (
@@ -231,17 +254,47 @@ export default function HomePage() {
       <div className="main-content">
         <div className="create-section">
           <h2>发起新活动</h2>
-          <CreateActivity onActivityCreated={handleActivityCreated} />
+          <CreateActivity 
+            onActivityCreated={handleActivityCreated} 
+            user={user} 
+            isLoggedIn={isLoggedIn} 
+          />
         </div>
         <div className="activities-section">
           <h2>活动列表</h2>
+          {/* 搜索框 */}
+          <div className="search-bar">
+            <div className="search-input-container">
+              <input 
+                type="text" 
+                placeholder="搜索活动名称、描述或地点..." 
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              {searchQuery && (
+                <button 
+                  className="clear-search-btn"
+                  onClick={() => setSearchQuery('')}
+                  title="清除搜索"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+          {/* 搜索结果统计 */}
+          {searchQuery && (
+            <div className="search-results-info">
+              <p>找到 {filteredActivities.length} 个相关活动</p>
+            </div>
+          )}
           <div className="activities-list">
             {activitiesLoading ? (
               <div style={{ textAlign: 'center', padding: '40px' }}>
                 <p>正在加载活动...</p>
               </div>
-            ) : activities.length > 0 ? (
-              activities.map(activity => (
+            ) : (filteredActivities.length > 0 ? (
+              filteredActivities.map(activity => (
                 <ShowActivity 
                   key={activity.id} 
                   activity={activity} 
@@ -252,7 +305,7 @@ export default function HomePage() {
               <div style={{ textAlign: 'center', padding: '40px' }}>
                 <p>暂无活动，快来创建第一个活动吧！</p>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>

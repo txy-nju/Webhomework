@@ -206,4 +206,36 @@ export class ActivityService {
     Object.assign(activity, updateData);
     return await this.activityModel.save(activity);
   }
+
+  // 更新活动状态（只有创建者可以更新）
+  async updateActivityStatus(
+    activityId: number,
+    userId: number,
+    status: string
+  ) {
+    const activity = await this.activityModel.findOne({
+      where: { id: activityId },
+      relations: ['user'],
+    });
+
+    if (!activity) {
+      throw new Error('Activity not found');
+    }
+
+    if (activity.user.id !== userId) {
+      throw new Error('Only activity creator can update this activity');
+    }
+
+    // 验证状态值
+    const validStatuses = ['active', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      throw new Error(
+        'Invalid status. Must be one of: active, completed, cancelled'
+      );
+    }
+
+    // 更新活动状态
+    activity.status = status;
+    return await this.activityModel.save(activity);
+  }
 }

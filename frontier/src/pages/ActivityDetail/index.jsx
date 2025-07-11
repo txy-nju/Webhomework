@@ -11,7 +11,8 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
     name: '',
     time: '',
     description: '',
-    photo: ''
+    photo: '',
+    status: 'active'
   });
 
   // 获取活动参与者
@@ -68,7 +69,8 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
         name: activity.name,
         time: activity.time,
         description: activity.description,
-        photo: activity.photo
+        photo: activity.photo,
+        status: activity.status || 'active'
       });
       setIsEditing(true);
     }
@@ -182,7 +184,8 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
       name: activity.name,
       time: activity.time,
       description: activity.description,
-      photo: activity.photo
+      photo: activity.photo,
+      status: activity.status || 'active'
     });
     setIsEditing(true);
   };
@@ -194,7 +197,8 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
       name: '',
       time: '',
       description: '',
-      photo: ''
+      photo: '',
+      status: 'active'
     });
   };
 
@@ -296,6 +300,17 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
                   />
                 </div>
                 <div className="form-group">
+                  <label>活动状态:</label>
+                  <select
+                    value={editedActivity.status}
+                    onChange={(e) => setEditedActivity({...editedActivity, status: e.target.value})}
+                  >
+                    <option value="active">进行中</option>
+                    <option value="completed">已完成</option>
+                    <option value="cancelled">已取消</option>
+                  </select>
+                </div>
+                <div className="form-group">
                   <label>活动描述:</label>
                   <textarea
                     value={editedActivity.description}
@@ -313,7 +328,13 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
               /* 查看模式 */
               <div>
                 <div className="activity-header">
-                  <h2>{activity.name}</h2>
+                  <div className="title-and-status">
+                    <h2>{activity.name}</h2>
+                    <span className={`activity-status ${activity.status || 'active'}`}>
+                      {activity.status === 'completed' ? '已完成' : 
+                       activity.status === 'cancelled' ? '已取消' : '进行中'}
+                    </span>
+                  </div>
                   {isCreator && (
                     <button onClick={handleStartEdit} className="edit-btn">编辑活动</button>
                   )}

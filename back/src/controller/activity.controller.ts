@@ -143,4 +143,21 @@ export class ActivityController {
       return { success: false, message: error.message };
     }
   }
+
+  // 更新活动状态
+  @Post('/update-status')
+  async updateActivityStatus(
+    @Body() body: { activityId: number; userId: number; status: string }
+  ) {
+    try {
+      const result = await this.activityService.updateActivityStatus(
+        body.activityId,
+        body.userId,
+        body.status
+      );
+      return { success: true, message: '活动状态更新成功', data: result };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
 }

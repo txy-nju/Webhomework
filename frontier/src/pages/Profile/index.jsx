@@ -105,6 +105,38 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
             alert('退出活动时出错，请重试');
         }
     };
+    // 处理完成活动状态
+    const handleActivityCompletion = async (activity) => {
+        try {
+            const response = await fetch('http://localhost:7001/api/activity/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    activityId: activity.id,
+                    userId: user.id,
+                    status: 'completed'
+                })
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('活动已标记为完成');
+                // 刷新创建的活动列表
+                const response = await fetch(`http://localhost:7001/api/user/created-activities?userId=${user.id}`);
+                const refreshResult = await response.json();
+                if (refreshResult.success) {
+                    setCreatedActivities(refreshResult.data);
+                }
+            } else {
+                alert(result.message || '更新活动状态失败');
+            }
+        } catch (error) {
+            console.error('更新活动状态出错:', error);
+            alert('更新活动状态时出错，请重试');
+        }
+    };
 
     // 关闭活动详情
     const handleCloseDetail = () => {
@@ -202,6 +234,7 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
                                                         type="created"
                                                         onViewDetail={handleViewDetail}
                                                         onEditActivity={handleEditActivity}
+                                                        onCompleteActivity={handleActivityCompletion}
                                                     />
                                                 );
                                             })
