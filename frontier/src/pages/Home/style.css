@@ -97,27 +97,72 @@
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  max-width: 400px;
+  max-width: 600px;
   margin: 24px auto;
 }
 
+.create-activity-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
 .create-activity-form input[type="text"],
-.create-activity-form input[type="file"] {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+.create-activity-form input[type="url"],
+.create-activity-form input[type="number"],
+.create-activity-form input[type="file"],
+.create-activity-form textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.create-activity-form input:focus,
+.create-activity-form textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.create-activity-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.create-activity-form .form-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.create-activity-form .form-note {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+.create-activity-form .creator-info {
+  font-size: 12px;
+  color: #1976d2;
+  margin: 0;
+  font-weight: 500;
 }
 
 .create-activity-form .buttonStyle {
   background-color: #1976d2;
   color: #fff;
   border: none;
-  padding: 10px 0;
-  border-radius: 4px;
+  padding: 14px 0;
+  border-radius: 6px;
   font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
+  margin-top: 8px;
 }
 
 .create-activity-form .buttonStyle:hover {
@@ -315,5 +360,17 @@
   
   .create-activity-form {
     margin: 16px;
+    max-width: none;
+  }
+  
+  .create-activity-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .create-activity-form .form-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }

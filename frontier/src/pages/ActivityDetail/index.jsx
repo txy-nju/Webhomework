@@ -12,7 +12,9 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
     time: '',
     description: '',
     photo: '',
-    status: 'active'
+    status: 'active',
+    location: '',
+    maxParticipants: ''
   });
 
   // 获取活动参与者
@@ -70,7 +72,9 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
         time: activity.time,
         description: activity.description,
         photo: activity.photo,
-        status: activity.status || 'active'
+        status: activity.status || 'active',
+        location: activity.location || '',
+        maxParticipants: activity.maxParticipants || ''
       });
       setIsEditing(true);
     }
@@ -185,7 +189,9 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
       time: activity.time,
       description: activity.description,
       photo: activity.photo,
-      status: activity.status || 'active'
+      status: activity.status || 'active',
+      location: activity.location || '',
+      maxParticipants: activity.maxParticipants || ''
     });
     setIsEditing(true);
   };
@@ -198,7 +204,9 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
       time: '',
       description: '',
       photo: '',
-      status: 'active'
+      status: 'active',
+      location: '',
+      maxParticipants: ''
     });
   };
 
@@ -291,6 +299,25 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
                   />
                 </div>
                 <div className="form-group">
+                  <label>活动地点:</label>
+                  <input
+                    type="text"
+                    value={editedActivity.location}
+                    onChange={(e) => setEditedActivity({...editedActivity, location: e.target.value})}
+                    placeholder="活动地点"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>最大参与人数:</label>
+                  <input
+                    type="number"
+                    value={editedActivity.maxParticipants}
+                    onChange={(e) => setEditedActivity({...editedActivity, maxParticipants: e.target.value})}
+                    placeholder="最大参与人数（可选）"
+                    min="1"
+                  />
+                </div>
+                <div className="form-group">
                   <label>活动照片URL:</label>
                   <input
                     type="text"
@@ -339,8 +366,48 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
                     <button onClick={handleStartEdit} className="edit-btn">编辑活动</button>
                   )}
                 </div>
-                <p><strong>时间：</strong>{activity.time}</p>
-                <p><strong>描述：</strong>{activity.description}</p>
+                
+                <div className="activity-info-grid">
+                  <div className="info-item">
+                    <strong>活动时间：</strong>
+                    <span>{activity.time}</span>
+                  </div>
+                  
+                  {activity.location && (
+                    <div className="info-item">
+                      <strong>活动地点：</strong>
+                      <span>{activity.location}</span>
+                    </div>
+                  )}
+                  
+                  <div className="info-item">
+                    <strong>参与人数：</strong>
+                    <span>{participants.length}/{activity.maxParticipants || '无限制'}</span>
+                  </div>
+                  
+                  <div className="info-item">
+                    <strong>创建时间：</strong>
+                    <span>{new Date(activity.createdAt).toLocaleDateString('zh-CN', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</span>
+                  </div>
+                  
+                  {activity.user && (
+                    <div className="info-item">
+                      <strong>活动发起人：</strong>
+                      <span>{activity.user.username}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="activity-description-section">
+                  <h3>活动描述</h3>
+                  <p className="activity-description">{activity.description}</p>
+                </div>
               </div>
             )}
             

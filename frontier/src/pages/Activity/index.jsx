@@ -42,9 +42,17 @@ export function CreateActivity({ onActivityCreated, user, isLoggedIn }) {
       name: formData.get('name'),
       description: formData.get('description'),
       time: formData.get('time'),
-      photo: 'https://via.placeholder.com/150', // 默认图片
+      location: formData.get('location'),
+      maxParticipants: formData.get('maxParticipants') ? parseInt(formData.get('maxParticipants')) : null,
+      photo: formData.get('photo') || 'https://via.placeholder.com/300x200?text=活动图片', // 支持自定义图片
       userId: user.id // 添加用户ID
     };
+    
+    // 验证必填字段
+    if (!data.name || !data.description || !data.time) {
+      alert('请填写所有必填字段');
+      return;
+    }
     
     try {
       // 这里可以添加对 data 的处理逻辑，比如发送请求
@@ -77,9 +85,55 @@ export function CreateActivity({ onActivityCreated, user, isLoggedIn }) {
   return (
     <div>
       <form className="create-activity-form" onSubmit={handleSubmit}>
-        <input type="text" name="name" placeholder="活动名称" required />
-        <input type="text" name="description" placeholder="活动描述" required />
-        <input type="text" name="time" placeholder="活动时间" required />
+        <div className="form-row">
+          <input 
+            type="text" 
+            name="name" 
+            placeholder="活动名称 *" 
+            required 
+          />
+          <input 
+            type="text" 
+            name="time" 
+            placeholder="活动时间 * (如: 2025-07-15 14:00)" 
+            required 
+          />
+        </div>
+        
+        <div className="form-row">
+          <input 
+            type="text" 
+            name="location" 
+            placeholder="活动地点 (可选)" 
+          />
+          <input 
+            type="number" 
+            name="maxParticipants" 
+            placeholder="最大参与人数 (可选)" 
+            min="1"
+          />
+        </div>
+        
+        <input 
+          type="url" 
+          name="photo" 
+          placeholder="活动图片URL (可选)" 
+        />
+        
+        <textarea 
+          name="description" 
+          placeholder="活动描述 *" 
+          rows="4"
+          required 
+        />
+        
+        <div className="form-info">
+          <p className="form-note">* 表示必填字段</p>
+          {isLoggedIn && user && (
+            <p className="creator-info">创建者: {user.username}</p>
+          )}
+        </div>
+        
         <button type="submit" className="buttonStyle">发起活动</button>
       </form>
     </div>
