@@ -21,6 +21,9 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   email: string;
 
+  @Column({ type: 'int', default: 0 })
+  score: number; // 用户积分
+
   @OneToMany(() => Activity, activity => activity.user)
   createdActivities: Activity[]; // 用户发起的活动列表
 

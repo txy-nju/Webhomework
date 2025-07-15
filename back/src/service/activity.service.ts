@@ -215,7 +215,7 @@ export class ActivityService {
   ) {
     const activity = await this.activityModel.findOne({
       where: { id: activityId },
-      relations: ['user'],
+      relations: ['user', 'participants'],
     });
 
     if (!activity) {
@@ -234,8 +234,44 @@ export class ActivityService {
       );
     }
 
+    // 如果活动从非完成状态变为完成状态，给用户加分
+    if (activity.status !== 'completed' && status === 'completed') {
+      try {
+        // 给创建者加3分
+        await this.updateCreatorScore(activity.user.id, 3);
+
+        // 给所有参与者加1分
+        if (activity.participants && activity.participants.length > 0) {
+          for (const participant of activity.participants) {
+            await this.updateParticipantScore(participant.id, 1);
+          }
+        }
+      } catch (error) {
+        console.error('更新积分失败:', error);
+        // 即使积分更新失败，也要更新活动状态
+      }
+    }
+
     // 更新活动状态
     activity.status = status;
     return await this.activityModel.save(activity);
+  }
+
+  // 更新创建者积分的辅助方法
+  private async updateCreatorScore(userId: number, score: number) {
+    const user = await this.userModel.findOne({ where: { id: userId } });
+    if (user) {
+      user.score = (user.score || 0) + score;
+      await this.userModel.save(user);
+    }
+  }
+
+  // 更新参与者积分的辅助方法
+  private async updateParticipantScore(userId: number, score: number) {
+    const user = await this.userModel.findOne({ where: { id: userId } });
+    if (user) {
+      user.score = (user.score || 0) + score;
+      await this.userModel.save(user);
+    }
   }
 }

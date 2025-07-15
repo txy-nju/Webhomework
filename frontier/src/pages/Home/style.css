@@ -1,16 +1,31 @@
+/* Header样式 - 现代化设计 */
 .fixed-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 60px;
-  background: #1976d2;
+  height: 70px;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
   color: #fff;
   display: flex;
   align-items: center;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+  backdrop-filter: blur(10px);
+  animation: slideInFromTop 0.5s ease-out;
 }
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .header-content {
   width: 100%;
   max-width: 1200px;
@@ -18,39 +33,258 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 30px;
 }
+
+.header-content > span {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+  animation: fadeInScale 0.8s ease-out 0.2s both;
+}
+
+@keyframes fadeInScale {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 导航按钮组 */
+.header-nav {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  animation: slideInFromLeft 0.6s ease-out 0.3s both;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.logo-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.logo-btn:hover::before {
+  left: 100%;
+}
+
+.logo-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.ranking-btn {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(255, 152, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.ranking-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.ranking-btn:hover::before {
+  left: 100%;
+}
+
+.ranking-btn:hover {
+  background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
 .login-btn {
-  background: #fff;
+  background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
   color: #1976d2;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 10px 24px;
+  border-radius: 25px;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideInFromRight 0.6s ease-out 0.4s both;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .login-btn:hover {
-  background: #f5f5f5;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 用户信息区域 */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 20px;
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideInFromRight 0.6s ease-out 0.4s both;
+}
+
+.user-info span {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
 }
 
 .user-btn {
-  background: #4caf50;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   color: #fff;
   border: none;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 20px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.3s, transform 0.2s;
-  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .user-btn:hover {
-  background: #45a049;
+  background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.logout-btn {
+  background: rgba(244, 67, 54, 0.9);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.logout-btn:hover {
+  background: rgba(244, 67, 54, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .fixed-header {
+    height: 60px;
+  }
+  
+  .header-content {
+    padding: 0 20px;
+  }
+  
+  .header-content > span {
+    font-size: 20px;
+  }
+  
+  .logo-btn,
+  .ranking-btn,
+  .login-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .user-info {
+    padding: 6px 15px;
+  }
+  
+  .user-btn,
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .header-content > span {
+    font-size: 18px;
+  }
+  
+  .logo-btn,
+  .ranking-btn {
+    display: none; /* 在小屏幕上隐藏部分按钮 */
+  }
+  
+  .user-info span {
+    display: none; /* 隐藏欢迎文字 */
+  }
 }
 .activity-box {
   display: flex;
@@ -171,7 +405,7 @@
 
 /* 主页面布局样式 */
 .main-content {
-  padding-top: 80px; /* 为固定头部留出空间 */
+  padding-top: 90px; /* 为固定头部留出空间 */
   max-width: 1200px;
   margin: 0 auto;
   padding-left: 24px;

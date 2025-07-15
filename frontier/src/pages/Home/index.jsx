@@ -5,8 +5,9 @@ import LoginPage from '../Login/index.jsx'
 import ActivityDetail from '../ActivityDetail/index.jsx'
 import { ShowActivity, CreateActivity } from '../Activity/index.jsx' // 从Activity导入组件
 import ProfilePage from '../Profile/index.jsx'
+import Ranking from '../Ranking/index.jsx'
 
-function Header({ onLoginClick, onProfileClick, onLogout, user, isLoggedIn }) {
+function Header({ onLoginClick, onProfileClick, onLogout, onRankingClick, user, isLoggedIn }) {
   const handleLogin = () => {
     // 处理登录按钮点击事件
     if (onLoginClick) {
@@ -28,17 +29,28 @@ function Header({ onLoginClick, onProfileClick, onLogout, user, isLoggedIn }) {
     }
   };
 
+  const handleRanking = () => {
+    // 处理排行榜按钮点击事件
+    if (onRankingClick) {
+      onRankingClick();
+    }
+  };
+
   return (
     <header className="fixed-header">
       <div className="header-content">
-        <span>体育活动室</span>
-        <button className='logo-btn' onClick={handleProfile}>我的活动</button>
+        <span>🏃‍♂️ 体育活动室</span>
+        <div className="header-nav">
+          <button className='logo-btn' onClick={handleProfile}>📋 我的活动</button>
+          <button className='ranking-btn' onClick={handleRanking}>🏆 排行榜</button>
+        </div>
         {!isLoggedIn ? (
-          <button className="login-btn" onClick={handleLogin}>登录</button>
+          <button className="login-btn" onClick={handleLogin}>🔐 登录</button>
         ) : (
           <div className="user-info">
-            <span>欢迎回来，<button className='user-btn'>{user?.username || '用户'}</button> !</span>
-            <button className="logout-btn" onClick={handleLogout}>登出</button>
+            <span>欢迎回来，</span>
+            <button className='user-btn'>{user?.username || '用户'}</button>
+            <button className="logout-btn" onClick={handleLogout}>退出</button>
           </div>
         )}
       </div>
@@ -49,7 +61,7 @@ function Header({ onLoginClick, onProfileClick, onLogout, user, isLoggedIn }) {
 // 主页面组件，管理活动列表状态
 export default function HomePage() {
   // 管理当前页面状态
-  const [currentPage, setCurrentPage] = useState('home'); // 'home', 'login', 'activityDetail'
+  const [currentPage, setCurrentPage] = useState('home'); // 'home', 'login', 'activityDetail', 'profile', 'ranking'
   const [selectedActivity, setSelectedActivity] = useState(null); // 当前选中的活动
   // 提示：添加用户状态
   const [user, setUser] = useState(null); // null表示未登录
@@ -205,6 +217,11 @@ export default function HomePage() {
     }
   }
 
+  // 处理排行榜按钮点击
+  const handleRankingClick = () => {
+    setCurrentPage('ranking');
+  };
+
   // 处理搜索输入
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -215,7 +232,14 @@ export default function HomePage() {
   if (currentPage === 'login') {
     return (
       <div>
-        <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} onLogout={handleLogout} user={user} isLoggedIn={isLoggedIn} />
+        <Header 
+          onLoginClick={handleLoginClick} 
+          onProfileClick={handleProfileClick} 
+          onLogout={handleLogout} 
+          onRankingClick={handleRankingClick}
+          user={user} 
+          isLoggedIn={isLoggedIn} 
+        />
         <div className="main-content">
           <LoginPage onBackToHome={handleBackToHome} onLoginSuccess={handleLoginSuccess} />
         </div>
@@ -226,7 +250,14 @@ export default function HomePage() {
   if (currentPage === 'activityDetail') {
     return (
       <div>
-        <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} onLogout={handleLogout} user={user} isLoggedIn={isLoggedIn} />
+        <Header 
+          onLoginClick={handleLoginClick} 
+          onProfileClick={handleProfileClick} 
+          onLogout={handleLogout} 
+          onRankingClick={handleRankingClick}
+          user={user} 
+          isLoggedIn={isLoggedIn} 
+        />
         <ActivityDetail 
           activity={selectedActivity}
           onBackToHome={handleBackToHome}
@@ -240,7 +271,14 @@ export default function HomePage() {
   if (currentPage === 'profile') {
     return (
       <div>
-        <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} onLogout={handleLogout} user={user} isLoggedIn={isLoggedIn} />
+        <Header 
+          onLoginClick={handleLoginClick} 
+          onProfileClick={handleProfileClick} 
+          onLogout={handleLogout} 
+          onRankingClick={handleRankingClick}
+          user={user} 
+          isLoggedIn={isLoggedIn} 
+        />
         <div className="main-content">
           <ProfilePage user={user} isLoggedIn={isLoggedIn} onBackHome={handleBackToHome} />
         </div>
@@ -248,9 +286,38 @@ export default function HomePage() {
     );
   }
 
+  if (currentPage === 'ranking') {
+    return (
+      <div>
+        <Header 
+          onLoginClick={handleLoginClick} 
+          onProfileClick={handleProfileClick} 
+          onLogout={handleLogout} 
+          onRankingClick={handleRankingClick}
+          user={user} 
+          isLoggedIn={isLoggedIn} 
+        />
+        <div className="main-content">
+          <Ranking 
+            onBackToHome={handleBackToHome} 
+            user={user} 
+            isLoggedIn={isLoggedIn} 
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <Header onLoginClick={handleLoginClick} onProfileClick={handleProfileClick} onLogout={handleLogout} user={user} isLoggedIn={isLoggedIn} />
+      <Header 
+        onLoginClick={handleLoginClick} 
+        onProfileClick={handleProfileClick} 
+        onLogout={handleLogout} 
+        onRankingClick={handleRankingClick}
+        user={user} 
+        isLoggedIn={isLoggedIn} 
+      />
       <div className="main-content">
         <div className="create-section">
           <h2>发起新活动</h2>

@@ -126,9 +126,44 @@ export class UserService {
         password: userData.password,
         email: userData.email,
       });
+
       return await this.userModel.save(newUser);
     } catch (error) {
       console.error('创建用户失败:', error);
+      throw error;
+    }
+  }
+
+  // 更新用户积分
+  async updateUserScore(userId: number, scoreChange: number) {
+    try {
+      const user = await this.userModel.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new Error('用户不存在');
+      }
+
+      user.score += scoreChange;
+      return await this.userModel.save(user);
+    } catch (error) {
+      console.error('更新用户积分失败:', error);
+      throw error;
+    }
+  }
+
+  // 获取用户排行榜
+  async getUserRanking() {
+    try {
+      const users = await this.userModel.find({
+        order: { score: 'DESC' },
+        select: ['id', 'username', 'score'],
+      });
+
+      return users.map((user, index) => ({
+        ...user,
+        rank: index + 1,
+      }));
+    } catch (error) {
+      console.error('获取用户排行榜失败:', error);
       throw error;
     }
   }
