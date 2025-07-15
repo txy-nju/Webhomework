@@ -1,8 +1,27 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './style.css'
+import RegisterForm from './RegisterForm'
 
 // 登录页面组件
 function LoginPage({ onBackToHome, onLoginSuccess }) {
+  const [isLoginMode, setIsLoginMode] = useState(true); // true: 登录模式, false: 注册模式
+  
+  // 切换到注册模式
+  const switchToRegister = () => {
+    setIsLoginMode(false);
+  };
+  
+  // 切换到登录模式
+  const switchToLogin = () => {
+    setIsLoginMode(true);
+  };
+  
+  // 处理注册成功
+  const handleRegisterSuccess = () => {
+    // 注册成功后切换到登录模式
+    setIsLoginMode(true);
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -45,31 +64,50 @@ function LoginPage({ onBackToHome, onLoginSuccess }) {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>用户登录</h2>
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <input 
-              type="text" 
-              name="username" 
-              placeholder="用户名" 
-              required 
-              className="login-input"
-            />
+        {isLoginMode ? (
+          /* 登录表单 */
+          <div className="login-form">
+            <h2>用户登录</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <input 
+                  type="text" 
+                  name="username" 
+                  placeholder="用户名" 
+                  required 
+                  className="login-input"
+                />
+              </div>
+              <div className="form-group">
+                <input 
+                  type="password" 
+                  name="password" 
+                  placeholder="密码" 
+                  required 
+                  className="login-input"
+                />
+              </div>
+              <button type="submit" className="login-submit-btn">登录</button>
+              <button type="button" className="switch-btn" onClick={switchToRegister}>
+                没有账号？点击注册
+              </button>
+              <button type="button" className="back-btn" onClick={onBackToHome}>
+                返回首页
+              </button>
+            </form>
           </div>
-          <div className="form-group">
-            <input 
-              type="password" 
-              name="password" 
-              placeholder="密码" 
-              required 
-              className="login-input"
+        ) : (
+          /* 注册表单 */
+          <div>
+            <RegisterForm 
+              onRegisterSuccess={handleRegisterSuccess}
+              onSwitchToLogin={switchToLogin}
             />
+            <button type="button" className="back-btn standalone" onClick={onBackToHome}>
+              返回首页
+            </button>
           </div>
-          <button type="submit" className="login-submit-btn">登录</button>
-          <button type="button" className="back-btn" onClick={onBackToHome}>
-            返回首页
-          </button>
-        </form>
+        )}
       </div>
     </div>
   );

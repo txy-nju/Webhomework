@@ -106,4 +106,30 @@ export class UserService {
       return { success: false, message: '获取创建活动失败: ' + error.message };
     }
   }
+
+  // 根据用户名获取用户
+  async getUserByUsername(username: string) {
+    return await this.userModel.findOne({
+      where: { username },
+    });
+  }
+
+  // 创建新用户
+  async createUser(userData: {
+    username: string;
+    password: string;
+    email: string;
+  }) {
+    try {
+      const newUser = this.userModel.create({
+        username: userData.username,
+        password: userData.password,
+        email: userData.email,
+      });
+      return await this.userModel.save(newUser);
+    } catch (error) {
+      console.error('创建用户失败:', error);
+      throw error;
+    }
+  }
 }
