@@ -41,7 +41,7 @@ function Header({ onLoginClick, onProfileClick, onLogout, onRankingClick, user, 
       <div className="header-content">
         <span>🏃‍♂️ 体育活动室</span>
         <div className="header-nav">
-          <button className='logo-btn' onClick={handleProfile}>📋 我的活动</button>
+          <button className='logo-btn' onClick={handleProfile}>📋 个人中心</button>
           <button className='ranking-btn' onClick={handleRanking}>🏆 排行榜</button>
         </div>
         {!isLoggedIn ? (

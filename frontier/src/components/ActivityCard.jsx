@@ -1,7 +1,7 @@
 
 import './ActivityCard.css'
 
-const ActivityCard = ({ activity, type, onViewDetail, onLeaveActivity, onEditActivity, onCompleteActivity }) => {
+const ActivityCard = ({ activity, type, onViewDetail, onLeaveActivity, onEditActivity, onCompleteActivity, isViewOnly }) => {
     // 添加调试信息
     console.log('ActivityCard render:', { activity, type, onViewDetail: !!onViewDetail, onLeaveActivity: !!onLeaveActivity });
     
@@ -74,7 +74,7 @@ const ActivityCard = ({ activity, type, onViewDetail, onLeaveActivity, onEditAct
                 <button className="btn-detail" onClick={() => onViewDetail && onViewDetail(activity)}>
                     查看详情
                 </button>
-                {type === 'created' && (
+                {!isViewOnly && type === 'created' && (
                     <>
                         <button className="btn-edit" onClick={() => onEditActivity && onEditActivity(activity)}>
                             编辑活动
@@ -86,7 +86,7 @@ const ActivityCard = ({ activity, type, onViewDetail, onLeaveActivity, onEditAct
                         )}
                     </>
                 )}
-                {type === 'participated' && (
+                {!isViewOnly && type === 'participated' && (
                     <button className="btn-quit" onClick={() => onLeaveActivity && onLeaveActivity(activity)}>
                         退出活动
                     </button>

@@ -6,6 +6,7 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isParticipating, setIsParticipating] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedActivity, setEditedActivity] = useState({
     name: '',
@@ -53,32 +54,22 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
     }
   }, [user, participants]);
 
-  useEffect(() => {
-    if (activity) {
-      fetchParticipants();
-      fetchComments();
+  // 检查是否已关注活动发起者
+  const checkFollowStatus = useCallback(async () => {
+    if (!user || !activity || !activity.user || user.id === activity.user.id) {
+      return; // 不能关注自己
     }
-  }, [activity, fetchParticipants, fetchComments]);
 
-  useEffect(() => {
-    checkParticipation();
-  }, [checkParticipation]);
-
-  // 处理自动进入编辑模式
-  useEffect(() => {
-    if (startInEditMode && activity) {
-      setEditedActivity({
-        name: activity.name,
-        time: activity.time,
-        description: activity.description,
-        photo: activity.photo,
-        status: activity.status || 'active',
-        location: activity.location || '',
-        maxParticipants: activity.maxParticipants || ''
-      });
-      setIsEditing(true);
+    try {
+      const response = await fetch(`http://localhost:7001/api/follow/status?followerId=${user.id}&followingId=${activity.user.id}`);
+      const result = await response.json();
+      if (result.success) {
+        setIsFollowing(result.isFollowing);
+      }
+    } catch (error) {
+      console.error('检查关注状态失败:', error);
     }
-  }, [startInEditMode, activity]);
+  }, [user, activity]);
 
   // 参与活动
   const handleJoinActivity = async () => {
@@ -250,8 +241,80 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
     }
   };
 
+  // 关注活动
   // 检查当前用户是否是活动创建者
   const isCreator = user && activity.user && user.id === activity.user.id;
+
+  useEffect(() => {
+    if (activity) {
+      fetchParticipants();
+      fetchComments();
+      checkFollowStatus();
+    }
+  }, [activity, fetchParticipants, fetchComments, checkFollowStatus]);
+
+  useEffect(() => {
+    checkParticipation();
+  }, [checkParticipation]);
+
+  // 处理自动进入编辑模式
+  useEffect(() => {
+    if (startInEditMode && activity) {
+      setEditedActivity({
+        name: activity.name,
+        time: activity.time,
+        description: activity.description,
+        photo: activity.photo,
+        status: activity.status || 'active',
+        location: activity.location || '',
+        maxParticipants: activity.maxParticipants || ''
+      });
+      setIsEditing(true);
+    }
+  }, [startInEditMode, activity]);
+
+  // 关注/取消关注活动发起者
+  const handleFollowCreator = async () => {
+    if (!isLoggedIn) {
+      alert('请先登录');
+      return;
+    }
+
+    if (!activity || !activity.user) {
+      alert('无法获取活动发起者信息');
+      return;
+    }
+
+    if (user.id === activity.user.id) {
+      alert('不能关注自己');
+      return;
+    }
+
+    try {
+      const endpoint = isFollowing ? '/api/follow/unfollow' : '/api/follow/follow';
+      const response = await fetch(`http://localhost:7001${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          followerId: user.id,
+          followingId: activity.user.id
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setIsFollowing(!isFollowing);
+        alert(result.message);
+      } else {
+        alert(result.message || (isFollowing ? '取消关注失败' : '关注失败'));
+      }
+    } catch (error) {
+      console.error('关注操作失败:', error);
+      alert('操作失败，请重试');
+    }
+  };
 
   if (!activity) {
     return (
@@ -425,6 +488,16 @@ function ActivityDetail({ activity, onBackToHome, user, isLoggedIn, startInEditM
                 )
               ) : (
                 <p className="login-prompt">请登录后参与活动</p>
+              )}
+              
+              {/* 关注发起者按钮 */}
+              {isLoggedIn && activity.user && user.id !== activity.user.id && (
+                <button 
+                  onClick={handleFollowCreator} 
+                  className={`follow-creator-btn ${isFollowing ? 'following' : ''}`}
+                >
+                  {isFollowing ? '取消关注发起者' : '关注发起者'}
+                </button>
               )}
             </div>
           </div>

@@ -79,6 +79,11 @@
 
 .participation-section {
   margin-top: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
 }
 
 .join-btn {
@@ -115,6 +120,37 @@
   color: #ffc107;
   font-weight: bold;
   font-size: 16px;
+}
+
+/* 关注发起者按钮样式 */
+.follow-creator-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin-left: 10px;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.follow-creator-btn:hover {
+  background: linear-gradient(135deg, #ee5a24 0%, #c23616 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.follow-creator-btn.following {
+  background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+  box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);
+}
+
+.follow-creator-btn.following:hover {
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  box-shadow: 0 4px 12px rgba(113, 128, 150, 0.4);
 }
 
 /* 参与者列表 */
@@ -478,5 +514,15 @@
   .info-item span {
     font-size: 15px;
     padding: 6px 10px;
+  }
+  
+  .participation-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .follow-creator-btn {
+    margin-left: 0;
+    margin-top: 10px;
   }
 }

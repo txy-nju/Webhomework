@@ -2,6 +2,8 @@ import './style.css'
 import { ShowActivity } from '../Activity'
 import ActivityCard from '../../components/ActivityCard'
 import ActivityDetail from '../ActivityDetail'
+import FollowList from './FollowList'
+import UserProfile from '../UserProfile'
 import { useEffect, useState } from 'react'
 
 function ProfilePage({ user, isLoggedIn, onBackHome }){
@@ -12,6 +14,9 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
     const [selectedActivity, setSelectedActivity] = useState(null)
     const [showActivityDetail, setShowActivityDetail] = useState(false)
     const [editMode, setEditMode] = useState(false)
+    // 新增用户资料查看相关状态
+    const [showUserProfile, setShowUserProfile] = useState(false)
+    const [targetUser, setTargetUser] = useState(null)
 
     useEffect(() => {
         const fetchParticipatedActivities = async () => {
@@ -143,6 +148,10 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
         setShowActivityDetail(false);
         setSelectedActivity(null);
         setEditMode(false);
+        // 如果有targetUser，说明是从UserProfile页面来的，返回到UserProfile
+        if (targetUser) {
+            setShowUserProfile(true);
+        }
     };
 
     // 处理编辑活动
@@ -153,9 +162,38 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
         setShowActivityDetail(true);
     };
 
+    // 处理查看用户资料
+    const handleViewUserProfile = (targetUserInfo) => {
+        setTargetUser(targetUserInfo);
+        setShowUserProfile(true);
+    };
+
+    // 返回到个人中心
+    const handleBackToProfile = () => {
+        setShowUserProfile(false);
+        setTargetUser(null);
+    };
+
+    // 查看活动详情（从用户资料页面）
+    const handleViewActivityFromProfile = (activity) => {
+        setSelectedActivity(activity);
+        setShowActivityDetail(true);
+        setEditMode(false);
+        // 关闭用户资料页面
+        setShowUserProfile(false);
+    };
+
     return (
         <div className='profile-page'>
-            {showActivityDetail && selectedActivity ? (
+            {showUserProfile && targetUser ? (
+                <UserProfile
+                    targetUser={targetUser}
+                    onBackToProfile={handleBackToProfile}
+                    onViewActivity={handleViewActivityFromProfile}
+                    currentUser={user}
+                    isLoggedIn={isLoggedIn}
+                />
+            ) : showActivityDetail && selectedActivity ? (
                 <ActivityDetail
                     activity={selectedActivity}
                     onBackToHome={handleCloseDetail}
@@ -241,6 +279,20 @@ function ProfilePage({ user, isLoggedIn, onBackHome }){
                                         ) : (
                                             <p className='no-activities'>暂无发起的活动</p>
                                         )}
+                                    </div>
+                                </div>
+                                <div className='follow-section'>
+                                    <div className='follow-lists'>
+                                        <FollowList 
+                                            user={user} 
+                                            type="following" 
+                                            onViewUserProfile={handleViewUserProfile}
+                                        />
+                                        <FollowList 
+                                            user={user} 
+                                            type="followers" 
+                                            onViewUserProfile={handleViewUserProfile}
+                                        />
                                     </div>
                                 </div>
                             </>
