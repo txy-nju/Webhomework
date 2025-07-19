@@ -1,0 +1,57 @@
+# 🚀 我的第一个GitHub Actions
+
+# 这个工作流超级简单，只是证明GitHub Actions能工作
+# 就像第一次骑自行车，先学会不摔倒，再考虑骑得快
+
+name: 我的第一个自动化
+
+# 什么时候运行：当你推送代码到main分支时
+on:
+  push:
+    branches: [main]
+
+# 要做什么工作
+jobs:
+  # 工作名称：打个招呼
+  say-hello:
+    name: 👋 打个招呼
+    runs-on: ubuntu-latest # 在Linux系统上运行
+
+    steps:
+      - name: 🎉 欢迎使用GitHub Actions
+        run: |
+          echo "🎉 恭喜！你的第一个GitHub Actions成功运行了！"
+          echo "📅 当前时间：$(date)"
+          echo "🌍 运行环境：Ubuntu Linux"
+          echo "💻 这证明你可以让GitHub帮你自动做事情了！"
+          echo ""
+          echo "🎯 接下来你可以尝试："
+          echo "   - 让它自动检查你的代码"
+          echo "   - 让它自动运行测试"
+          echo "   - 让它自动部署应用"
+          echo ""
+          echo "🚀 GitHub Actions的世界欢迎你！"
+
+  # 工作名称：检查基本信息
+  check-info:
+    name: 📋 检查项目信息
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 获取你的代码
+        uses: actions/checkout@v4
+
+      - name: 🔍 查看项目结构
+        run: |
+          echo "📂 你的项目结构："
+          ls -la
+          echo ""
+          echo "📄 让我们看看有哪些文件："
+          find . -type f -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.json" | head -10
+          echo ""
+          echo "✨ 看起来你有一个很棒的项目！"
+
+# 小贴士：
+# 1. 推送代码后，去GitHub网站 → 你的仓库 → Actions页面查看结果
+# 2. 看到绿色✅就是成功，红色❌也不要怕，点进去看原因
+# 3. 这只是开始，后面我们可以让它做更多有用的事情！

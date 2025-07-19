@@ -1,0 +1,147 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch: # 手动触发
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+  release:
+    types: [published] # 发布release时自动触发
+
+env:
+  NODE_VERSION: "20.x"
+  BACKEND_PORT: 7001
+  FRONTEND_PORT: 3000
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: |
+            back/package-lock.json
+            frontier/package-lock.json
+
+      # 构建后端
+      - name: Build backend
+        run: |
+          cd back
+          npm ci
+          npm run build
+          echo "Backend build completed"
+
+      # 构建前端
+      - name: Build frontend
+        run: |
+          cd frontier
+          npm ci
+          npm run build
+          echo "Frontend build completed"
+        env:
+          VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+
+      # Docker构建（如果使用Docker部署）
+      - name: Build Docker images
+        run: |
+          # 构建后端Docker镜像
+          docker build -t sports-app-backend:${{ github.sha }} ./back
+
+          # 构建前端Docker镜像
+          docker build -t sports-app-frontend:${{ github.sha }} ./frontier
+
+      # 部署到云服务器（示例：使用SSH）
+      - name: Deploy to server
+        if: github.event.inputs.environment != 'staging'
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # 停止现有服务
+            sudo systemctl stop sports-app-backend || true
+            sudo systemctl stop sports-app-frontend || true
+
+            # 备份当前版本
+            sudo cp -r /opt/sports-app /opt/sports-app-backup-$(date +%Y%m%d_%H%M%S) || true
+
+            # 创建部署目录
+            sudo mkdir -p /opt/sports-app/{backend,frontend}
+
+            # 上传新版本（这里需要先将构建结果传输到服务器）
+            # 实际部署中你可能需要使用rsync或scp
+
+            # 安装后端依赖并启动
+            cd /opt/sports-app/backend
+            sudo npm ci --only=production
+            sudo systemctl start sports-app-backend
+            sudo systemctl enable sports-app-backend
+
+            # 部署前端文件到nginx
+            sudo cp -r /opt/sports-app/frontend/dist/* /var/www/sports-app/
+            sudo systemctl reload nginx
+
+            # 健康检查
+            sleep 10
+            curl -f http://localhost:7001/api/health || exit 1
+
+      # 部署到Vercel（前端）
+      - name: Deploy frontend to Vercel
+        if: github.event.inputs.environment == 'production'
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          working-directory: ./frontier
+          vercel-args: "--prod"
+
+      # 部署到Heroku（后端）
+      - name: Deploy backend to Heroku
+        if: github.event.inputs.environment == 'production'
+        uses: akhileshns/heroku-deploy@v3.12.14
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "your-sports-app-backend"
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          appdir: "back"
+
+      # 部署后测试
+      - name: Post-deployment tests
+        run: |
+          echo "Running post-deployment tests..."
+          # 这里可以添加部署后的健康检查
+          sleep 30
+          # curl -f ${{ steps.deploy.outputs.page_url }}/api/health
+          echo "Post-deployment tests completed"
+
+      # 通知部署结果
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: "#deployments"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

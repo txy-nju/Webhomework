@@ -1,0 +1,176 @@
+name: Release Management
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # 匹配版本标签，如 v1.0.0
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g., v1.0.0)"
+        required: true
+        type: string
+      prerelease:
+        description: "Is this a prerelease?"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    outputs:
+      release-id: ${{ steps.create-release.outputs.id }}
+      upload-url: ${{ steps.create-release.outputs.upload_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Get version
+        id: get-version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # 使用git log生成changelog
+          PREVIOUS_TAG=$(git describe --abbrev=0 --tags HEAD~1 2>/dev/null || echo "")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%an)" $PREVIOUS_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%an)")
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Build release assets
+        run: |
+          # 构建后端
+          cd back
+          npm ci
+          npm run build
+          tar -czf ../backend-${{ steps.get-version.outputs.version }}.tar.gz dist/ package.json package-lock.json
+
+          # 构建前端
+          cd ../frontier
+          npm ci
+          npm run build
+          tar -czf ../frontend-${{ steps.get-version.outputs.version }}.tar.gz dist/
+
+          # 创建完整发布包
+          cd ..
+          mkdir -p release-package
+          cp backend-${{ steps.get-version.outputs.version }}.tar.gz release-package/
+          cp frontend-${{ steps.get-version.outputs.version }}.tar.gz release-package/
+          tar -czf sports-app-${{ steps.get-version.outputs.version }}.tar.gz release-package/
+
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get-version.outputs.version }}
+          release_name: Sports Activity Manager ${{ steps.get-version.outputs.version }}
+          body: |
+            ## 🎉 Sports Activity Manager ${{ steps.get-version.outputs.version }}
+
+            ### 📋 Changes in this release:
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### 📦 Assets:
+            - `backend-${{ steps.get-version.outputs.version }}.tar.gz` - Backend application
+            - `frontend-${{ steps.get-version.outputs.version }}.tar.gz` - Frontend application  
+            - `sports-app-${{ steps.get-version.outputs.version }}.tar.gz` - Complete application package
+
+            ### 🚀 Quick Start:
+            1. Download the complete package
+            2. Extract and follow the deployment guide in README.md
+            3. Configure environment variables
+            4. Start the application
+
+            ### 🔧 Requirements:
+            - Node.js 18+ 
+            - SQLite database
+            - Modern web browser
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease || false }}
+
+      - name: Upload Backend Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./backend-${{ steps.get-version.outputs.version }}.tar.gz
+          asset_name: backend-${{ steps.get-version.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Frontend Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./frontend-${{ steps.get-version.outputs.version }}.tar.gz
+          asset_name: frontend-${{ steps.get-version.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Complete Package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./sports-app-${{ steps.get-version.outputs.version }}.tar.gz
+          asset_name: sports-app-${{ steps.get-version.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
+
+  # 自动部署到生产环境（仅非预发布版本）
+  auto-deploy:
+    needs: create-release
+    if: ${{ !github.event.inputs.prerelease }}
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+    secrets: inherit
+
+  # 更新文档
+  update-docs:
+    needs: create-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update README with latest version
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          sed -i "s/Version: .*/Version: $VERSION/" README.md
+
+          # 如果有API文档，也可以在这里更新
+
+      - name: Commit documentation updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "docs: update version to ${{ needs.create-release.outputs.version }}" || exit 0
+          git push

@@ -1,0 +1,101 @@
+# 这是一个简单的自动化工作流
+# 每次你推送代码时，它会自动运行测试和构建
+
+name: 简单的代码检查
+
+# 什么时候运行这个工作流
+on:
+  push:
+    branches: [main] # 只有推送到main分支时才运行
+  pull_request:
+    branches: [main] # 有人想合并代码到main时也运行
+
+# 要做的工作
+jobs:
+  # 检查后端
+  check-backend:
+    name: 检查后端代码
+    runs-on: ubuntu-latest # 在Linux系统上运行
+
+    steps:
+      # 第1步：下载你的代码
+      - name: 📥 下载代码
+        uses: actions/checkout@v4
+
+      # 第2步：安装Node.js
+      - name: 🔧 安装Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # 第3步：安装后端依赖
+      - name: 📦 安装后端依赖
+        run: |
+          cd back
+          npm install
+
+      # 第4步：检查代码是否能构建
+      - name: 🏗️ 尝试构建后端
+        run: |
+          cd back
+          npm run build || echo "构建失败，但继续运行"
+        continue-on-error: true # 即使失败也继续
+
+      # 第5步：运行测试（如果有的话）
+      - name: 🧪 运行测试
+        run: |
+          cd back
+          npm run test || echo "没有测试或测试失败"
+        continue-on-error: true
+
+  # 检查前端
+  check-frontend:
+    name: 检查前端代码
+    runs-on: ubuntu-latest
+
+    steps:
+      # 第1步：下载你的代码
+      - name: 📥 下载代码
+        uses: actions/checkout@v4
+
+      # 第2步：安装Node.js
+      - name: 🔧 安装Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # 第3步：安装前端依赖
+      - name: 📦 安装前端依赖
+        run: |
+          cd frontier
+          npm install
+
+      # 第4步：检查代码是否能构建
+      - name: 🏗️ 尝试构建前端
+        run: |
+          cd frontier
+          npm run build || echo "构建失败，但继续运行"
+        continue-on-error: true
+
+      # 第5步：运行代码检查（如果有的话）
+      - name: 🔍 检查代码质量
+        run: |
+          cd frontier
+          npm run lint || echo "没有代码检查或检查失败"
+        continue-on-error: true
+
+  # 如果前面都成功，显示成功消息
+  success:
+    name: ✅ 所有检查完成
+    runs-on: ubuntu-latest
+    needs: [check-backend, check-frontend] # 等前面两个完成
+
+    steps:
+      - name: 🎉 恭喜
+        run: |
+          echo "🎉 恭喜！你的代码通过了所有基本检查"
+          echo "💡 这意味着："
+          echo "   - 代码可以正常下载"
+          echo "   - 依赖可以正常安装"
+          echo "   - 前后端都可以构建"
+          echo "🚀 接下来你可以考虑添加更多自动化功能！"

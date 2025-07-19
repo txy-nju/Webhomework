@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontier
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:7001
+    networks:
+      - sports-app-network
+
+  # 后端服务
+  backend:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    ports:
+      - "7001:7001"
+    environment:
+      - NODE_ENV=production
+      - PORT=7001
+    volumes:
+      - ./back/db.sqlite:/app/db.sqlite
+      - ./back/logs:/app/logs
+    networks:
+      - sports-app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 数据库备份服务（可选）
+  db-backup:
+    image: alpine:latest
+    volumes:
+      - ./back/db.sqlite:/backup/db.sqlite:ro
+      - ./backups:/backups
+    command: >
+      sh -c "
+        while true; do
+          cp /backup/db.sqlite /backups/db-backup-$$(date +%Y%m%d_%H%M%S).sqlite
+          find /backups -name 'db-backup-*.sqlite' -mtime +7 -delete
+          sleep 86400
+        done
+      "
+    networks:
+      - sports-app-network
+
+networks:
+  sports-app-network:
+    driver: bridge
+
+volumes:
+  sqlite-data:
+  backup-data:
