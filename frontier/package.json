@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "echo '暂时没有配置测试，跳过' && exit 0",
     "lint": "eslint .",
     "preview": "vite preview"
   },
