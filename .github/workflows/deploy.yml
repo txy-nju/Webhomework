@@ -135,13 +135,9 @@ jobs:
           # curl -f ${{ steps.deploy.outputs.page_url }}/api/health
           echo "Post-deployment tests completed"
 
-      # 通知部署结果
-      - name: Notify deployment status
-        if: always()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: "#deployments"
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      # 部署完成提示
+      - name: 部署完成
+        run: |
+          echo "🎉 部署完成！"
+          echo "📅 部署时间: $(date)"
+          echo "🔗 如果是生产环境，请检查应用是否正常运行"

@@ -1,0 +1,77 @@
+name: 简单部署
+
+on:
+  workflow_dispatch: # 手动触发
+    inputs:
+      environment:
+        description: "部署环境"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  build-and-deploy:
+    name: 构建和部署
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 下载代码
+        uses: actions/checkout@v4
+
+      - name: 🔧 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      # 构建后端
+      - name: 🏗️ 构建后端
+        run: |
+          cd back
+          npm ci
+          npm run build
+          echo "✅ 后端构建完成"
+
+      # 构建前端
+      - name: 🏗️ 构建前端
+        run: |
+          cd frontier
+          npm ci
+          npm run build
+          echo "✅ 前端构建完成"
+
+      # 创建部署包
+      - name: 📦 创建部署包
+        run: |
+          mkdir -p deployment
+          cp -r back/dist deployment/backend-dist
+          cp -r back/package*.json deployment/
+          cp -r frontier/dist deployment/frontend-dist
+          tar -czf deployment-${{ github.sha }}.tar.gz deployment/
+          echo "✅ 部署包创建完成"
+
+      # 上传部署包
+      - name: 📤 上传部署包
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-package
+          path: deployment-${{ github.sha }}.tar.gz
+          retention-days: 7
+
+      # 部署完成通知
+      - name: 🎉 部署完成
+        run: |
+          echo "🚀 部署流程完成！"
+          echo "📦 部署包已创建并上传"
+          echo "🔗 下载链接将在Actions页面的Artifacts中找到"
+          echo "⏰ 时间: $(date)"
+          echo "🌍 环境: ${{ github.event.inputs.environment }}"
+
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            echo "⚠️  生产环境部署，请确保："
+            echo "   - 数据库已备份"
+            echo "   - 服务器准备就绪" 
+            echo "   - 监控系统正常"
+          fi
