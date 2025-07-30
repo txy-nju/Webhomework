@@ -5,6 +5,8 @@ import * as info from '@midwayjs/info';
 import * as typeorm from '@midwayjs/typeorm';
 import * as cors from '@koa/cors';
 import { join } from 'path';
+import * as staticFile from '@midwayjs/static-file';
+import * as crossDomain from '@midwayjs/cross-domain';
 // import { DefaultErrorFilter } from './filter/default.filter';
 // import { NotFoundFilter } from './filter/notfound.filter';
 import { ReportMiddleware } from './middleware/report.middleware';
@@ -14,6 +16,8 @@ import { ReportMiddleware } from './middleware/report.middleware';
     koa,
     validate,
     typeorm,
+    staticFile,
+    crossDomain,
     {
       component: info,
       enabledEnvironment: ['local'],

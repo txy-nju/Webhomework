@@ -7,6 +7,18 @@ export default {
   koa: {
     port: 7001,
   },
+  staticFile: {
+    dirs: {
+      default: {
+        prefix: '/',
+        dir: 'public',
+      },
+      another: {
+        prefix: '/assets',
+        dir: 'public/assets',
+      },
+    },
+  },
   typeorm: {
     dataSource: {
       default: {
